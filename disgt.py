@@ -35,12 +35,15 @@ class Agent:
 
 
 class GradientTracking(IAlgorithm):
-    def __init__(self, nodes: List[Node], graph: IGraph, settings: GtSettings = GtSettings()):
-        self.nodes = nodes
+    def __init__(self, graph: IGraph, settings: GtSettings = GtSettings()):
+        self.nodes: List[Node] = Optional[None]
         self.graph = graph
         self.s = settings
         self.adj = self.graph.get_adj()
         self.weights = self.graph.get_weights()
+
+    def set_nodes(self, nodes: List[Node]):
+        self.nodes = nodes
 
     def run(self):
         err = 1e3
@@ -126,6 +129,8 @@ class Environment:
         self.settings: AlgorithmSettings = AlgorithmSettings()  # loading default settings
         self.iteration: Iteration = Optional[None]
         self.result: Result = Optional[None]
+        self.gt: GradientTracking = Optional[None]
+        self.graph: IGraph = Optional[None]
 
     def register_agent(self, agent: Agent):
         self.agents.append(agent)
@@ -176,6 +181,9 @@ class DiSGT:
             self.env.register_agent(agent)
 
         self.N = len(agents)
+
+    def set_network_topology(self, graph: IGraph):
+        self.env.graph = graph
 
     @staticmethod
     def validate(agents: List[Agent]):
