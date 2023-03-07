@@ -5,12 +5,13 @@ from numpy.random import randn, rand
 from sklearn import preprocessing
 
 
-def is_convex(Q: np.ndarray):
+def is_pd(Q: np.ndarray):
     eig = np.linalg.eig(Q)[0]
     return eig.all() >= 0
 
 
 def create_random_qp(n: int = 2) -> Tuple[np.ndarray, np.ndarray, float]:
+
     Q = preprocessing.normalize(randn(n, n), norm="l2")
     q = preprocessing.normalize(randn(n, 1), norm="l2")
     d = randn()
