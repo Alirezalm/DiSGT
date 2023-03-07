@@ -15,6 +15,10 @@ class IGraph(ABC):
     def get_weights(self) -> np.ndarray:
         pass
 
+    @abstractmethod
+    def get_neighbours_of(self, node_index: int):
+        pass
+
 
 class RingGraph(IGraph):
 
@@ -45,6 +49,9 @@ class RingGraph(IGraph):
     def get_adj(self) -> np.ndarray:
 
         return self.adj
+
+    def get_neighbours_of(self, node_index: int):
+        return np.where(self.adj[node_index, :] != 0)[0]
 
     def __metro_hasting(self):
         weights: np.ndarray = zeros([self.nnodes, self.nnodes])
