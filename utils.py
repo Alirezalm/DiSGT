@@ -13,7 +13,7 @@ def is_pd(Q: np.ndarray):
 def create_random_qp(n: int = 2) -> Tuple[np.ndarray, np.ndarray, float]:
 
     Q = preprocessing.normalize(randn(n, n), norm="l2")
-    q = preprocessing.normalize(randn(n, 1), norm="l2")
+    q = randn(n, 1)
     d = randn()
 
     Q = 0.5 * (Q + Q.T)

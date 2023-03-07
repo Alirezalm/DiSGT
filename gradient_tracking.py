@@ -66,6 +66,11 @@ class TemporaryStorage:
         for ind, agent in enumerate(self.network.agents):
             agent.current_x_estimate = self.x_temp[ind]
             agent.current_y_estimate = self.x_temp[ind]
+        self.reset()
+
+    def reset(self):
+        self.x_temp = []
+        self.y_temp = []
 
 
 class GradientTracking:
@@ -73,13 +78,20 @@ class GradientTracking:
         self.network = network
         self.cfg = cfg
         self.N = self.network.get_size()
+        self.n = None
         self.weights = self.network.get_double_stochastic_weights()
         self.tmp_storage = TemporaryStorage(network)
 
-    def run(self):
+    def initialize(self):
+        for agent in self.network.agents:
+            agent.current_x_estimate = np.zeros([self.n, 1])
+            agent.current_y_estimate = agent.obj.get_grad_at(agent.current_x_estimate)
 
+    def run(self, x0: np.ndarray):
+        self.n = x0.shape[0]
         err = 1e10
-
+        self.initialize()
+        f = self.compute_total_obj()
         while err > self.cfg.eps:
 
             for agent_index, agent in enumerate(self.network.agents):
@@ -89,15 +101,16 @@ class GradientTracking:
                 self.tmp_storage.add_new_estimates(x, y)
 
             self.update_agents()
-
-            print(np.linalg.norm(y))
+            fold = f
+            f = self.compute_total_obj()
+            err = abs(f - fold)
 
     def update_agents(self):
         self.tmp_storage.update_nodes()
 
     def estimate_x(self, node_index: int, in_index: List[int]) -> np.ndarray:
 
-        aggr = np.zeros([self.N, self.N])
+        aggr = np.zeros([self.n, 1])
 
         for k in in_index:
             aggr += self.weights[node_index, k] * self.network.agents[k].current_x_estimate
@@ -108,7 +121,7 @@ class GradientTracking:
 
     def estimate_y(self, node_index: int, in_index: List[int], new_estimate_x: np.ndarray):
 
-        aggr = np.zeros([self.N, self.N])
+        aggr = np.zeros([self.n, 1])
 
         for k in in_index:
             aggr += self.weights[node_index, k] * self.network.agents[k].current_y_estimate
@@ -120,3 +133,6 @@ class GradientTracking:
         grad_old = self.network.agents[node_index].obj.get_grad_at(x_old)
 
         return aggr + grad - grad_old
+
+    def compute_total_obj(self) -> float:
+        return sum([agent.obj.get_obj_at(agent.current_x_estimate) for agent in self.network.agents])
