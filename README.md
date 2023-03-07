@@ -1,7 +1,7 @@
 ### DiSGT
 
 Distributed Sparse Gradient Tracking (DiSGT) algorithm, is a distributed
-algorithm for solving sparse convex optimization problems in the f
+algorithm for solving sparse convex optimization problems in the
 following form,
 
 $$
