@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import Callable, Optional
 
 import numpy as np
 
@@ -68,3 +70,9 @@ class SparseLinearRegression(ISparseProblem):
 
     def compute_grad_at(self, x: np.ndarray) -> np.ndarray:
         pass
+
+
+@dataclass
+class ConvexNLP:
+    obj: Callable[[np.ndarray], float] = Optional[None]
+    grad: Callable[[np.ndarray], np.ndarray] = Optional[None]

@@ -1,20 +1,44 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List, Optional
 
-from problems import ISparseProblem, SparseConvexQP
+from problems import ISparseProblem, SparseConvexQP, ConvexNLP
 from utils import is_pd
+
+
+class IAlgorithm(ABC):
+
+    @abstractmethod
+    def run(self):
+        pass
+
+
+@dataclass
+class GtSettings:
+    eps: float = 1e-6
+    max_iter: int = 1e3
+    alpha: float = 1e-2
 
 
 @dataclass
 class AlgorithmSettings:
     max_iter: int = 1000
-    gamma: float = 1e-2
+    rho: float = 1e-2
     eps: float = 1e-6
 
 
 class Agent:
     def __init__(self, problem: ISparseProblem):
         self.problem = problem
+
+
+class GradientTracking(IAlgorithm):
+    def __init__(self, local_objs: List[ConvexNLP], settings: GtSettings = GtSettings()):
+        self.p_set = local_objs
+        self.s = settings
+
+    def run(self):
+        pass
 
 
 class Environment:
