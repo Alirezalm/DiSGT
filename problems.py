@@ -14,6 +14,10 @@ class ISparseProblem(ABC):
     def compute_grad_at(self, x: np.ndarray) -> np.ndarray:
         pass
 
+    @abstractmethod
+    def get_dim(self):
+        pass
+
 
 class SparseConvexQP(ISparseProblem):
 
@@ -40,8 +44,14 @@ class SparseConvexQP(ISparseProblem):
 
         return self.P @ x + self.c
 
+    def get_dim(self):
+        return self.n
+
 
 class SparseLogisticRegression(ISparseProblem):
+    def get_dim(self):
+        pass
+
     def compute_obj_at(self, x: np.ndarray) -> float:
         pass
 
@@ -50,6 +60,9 @@ class SparseLogisticRegression(ISparseProblem):
 
 
 class SparseLinearRegression(ISparseProblem):
+    def get_dim(self):
+        pass
+
     def compute_obj_at(self, x: np.ndarray) -> float:
         pass
 
