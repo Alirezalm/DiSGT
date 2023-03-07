@@ -73,6 +73,9 @@ class SparseLinearRegression(ISparseProblem):
 
 
 @dataclass
-class ConvexNLP:
+class Node:
     obj: Callable[[np.ndarray], float] = Optional[None]
     grad: Callable[[np.ndarray], np.ndarray] = Optional[None]
+    x: np.ndarray = None
+    y: np.ndarray = None
+
