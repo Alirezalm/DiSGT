@@ -41,10 +41,13 @@ def test_disgt_for_qp():
         Q, q, d = create_random_qp(n)
         problems.append(SparseConvexQP(Q, q, d, kappa))
 
-    dg = DiSGT(problems, network)
-    x, f = dg.optimize()
+    dg = DiSGT()
+    dg.set_local_problems(problems)
+    dg.set_network_topology(network)
 
-    assert get_sparsity(x) >= n - kappa
+    res = dg.optimize()
+
+    assert get_sparsity(res.current_solution) >= n - kappa
 
 
 def test_disgt_for_logreg():
@@ -60,6 +63,9 @@ def test_disgt_for_logreg():
 
         problems.append(SparseLogisticRegression(X, y, kappa))
 
-    dg = DiSGT(problems, network)
-    x, f = dg.optimize()
-    assert get_sparsity(x) >= n - kappa
+    dg = DiSGT()
+    dg.set_local_problems(problems)
+    dg.set_network_topology(network)
+
+    res = dg.optimize()
+    assert get_sparsity(res.current_solution) >= n - kappa
