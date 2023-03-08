@@ -110,7 +110,7 @@ class GradientTracking:
             f = self.compute_total_obj()
             err = self.compute_total_error()
 
-            if self.cfg:
+            if self.cfg.verbose:
                 self.display_logs()
 
         return f, x

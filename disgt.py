@@ -7,6 +7,9 @@ from gradient_tracking import ObjectiveFunction, Agent, ComputationNetwork, Grad
 from graph import IGraph
 from problems import ISparseProblem
 
+import gurobipy as gp
+from gurobipy import GRB
+
 
 class AugLagObjective(ObjectiveFunction):
 
@@ -37,11 +40,13 @@ class PrimalSolver:
         N = len(self.problems)
         for problem in self.problems:
             obj = AugLagObjective(problem, dual_vars, y, rho, N)
+
             agents.append(Agent(obj))
 
         network = ComputationNetwork(self.graph, agents)
 
         gt = GradientTracking(network)
+        gt.cfg.verbose = False
 
         x0 = np.zeros([n, 1])
 
@@ -51,14 +56,35 @@ class PrimalSolver:
 
 
 class SparsityEnforcer:
-    pass
+    def __init__(self):
+        self.model = None
+
+    def enforce(self, x: np.ndarray, lmbd: np.ndarray, rho: float, M: float, kappa: int):
+        self.model = gp.Model(SparsityEnforcer.__name__)
+        n = x.shape[0]
+        y = self.model.addMVar(shape=(n, 1), lb=-GRB.INFINITY)
+        delta = self.model.addMVar(shape=(n, 1), vtype=GRB.BINARY)
+
+        objective = -lmbd.T @ y + (rho / 2) * (float(x.T @ x) - 2 * x.T @ y + y.T @ y)
+        self.model.setObjective(objective)
+
+        for i in range(n):
+            self.model.addConstr(y[i] <= M * delta[i], name=f'b1{i}')
+            self.model.addConstr(-M * delta[i] <= y[i], name=f'b2{i}')
+
+        self.model.addConstr(delta.sum() <= kappa, name='d')
+        self.model.setParam('OutputFlag', 0)
+        self.model.optimize()
+
+        return y.x.reshape(n, 1)
 
 
 @dataclass
 class DiSGTSettings:
     max_iter: int = 1000
     eps: float = 1e-6
-    rho: float = 1
+    rho: float = 25
+    M: float = 5
 
 
 class DiSGT:
@@ -68,6 +94,7 @@ class DiSGT:
         self.graph = net_model
         self.primal_solver = PrimalSolver(p, net_model)
         self.sparsity_enforcer = SparsityEnforcer()
+        self.kappa = p[0].get_kappa()
 
     def optimize(self):
         err = 1e10
@@ -78,5 +105,8 @@ class DiSGT:
         rho = self.s.rho
 
         while err > self.s.eps:
-            self.primal_solver.update_x(lmbd, y, rho)
+            x = self.primal_solver.update_x(lmbd, y, rho)
+            y = self.sparsity_enforcer.enforce(x, lmbd, rho, self.s.M, self.kappa)
+            lmbd += rho * (x - y)
+            print(np.linalg.norm(x - y))
 

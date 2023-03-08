@@ -8,6 +8,7 @@ network = RingGraph(N)
 n = 10
 problems = []
 kappa = 5
+
 for i in range(N):
     Q, q, d = create_random_qp(n)
     problems.append(SparseConvexQP(Q, q, d, kappa))

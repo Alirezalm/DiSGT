@@ -20,6 +20,10 @@ class ISparseProblem(ABC):
     def get_dim(self):
         pass
 
+    @abstractmethod
+    def get_kappa(self):
+        pass
+
 
 class SparseConvexQP(ISparseProblem):
 
@@ -48,6 +52,9 @@ class SparseConvexQP(ISparseProblem):
 
     def get_dim(self):
         return self.n
+
+    def get_kappa(self):
+        return self.kappa
 
 
 class SparseLogisticRegression(ISparseProblem):
@@ -78,4 +85,3 @@ class Node:
     grad: Callable[[np.ndarray], np.ndarray] = Optional[None]
     x: np.ndarray = None
     y: np.ndarray = None
-
