@@ -10,6 +10,8 @@ from problems import ISparseProblem
 import gurobipy as gp
 from gurobipy import GRB
 
+from utils import get_sparsity
+
 
 class AugLagObjective(ObjectiveFunction):
 
@@ -96,6 +98,11 @@ class DiSGT:
         self.sparsity_enforcer = SparsityEnforcer()
         self.kappa = p[0].get_kappa()
 
+    def display_info(self, x, err):
+        log = f"{get_sparsity(x)} of {x.shape[0] - self.kappa}| {err: 4.4f}"
+
+        print(log)
+
     def optimize(self):
         err = 1e10
         n = self.p[0].get_dim()
@@ -107,6 +114,16 @@ class DiSGT:
         while err > self.s.eps:
             x = self.primal_solver.update_x(lmbd, y, rho)
             y = self.sparsity_enforcer.enforce(x, lmbd, rho, self.s.M, self.kappa)
-            lmbd += rho * (x - y)
-            print(np.linalg.norm(x - y))
 
+            lmbd += rho * (x - y)
+            err = np.linalg.norm(x - y)
+            # print(np.linalg.norm(x - y))
+            self.display_info(x, err)
+            f = self.compute_total_objective(x)
+
+        return x, f
+
+    def compute_total_objective(self, x: np.ndarray):
+        return sum([
+            problem.compute_obj_at(x) for problem in self.p
+        ])

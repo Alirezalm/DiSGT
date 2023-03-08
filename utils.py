@@ -30,3 +30,13 @@ def create_random_logistic_regression_data(m: int = 100, n: int = 2) -> Tuple[np
     y[y < 0.5] = 0
 
     return X, y
+
+
+def get_sparsity(x: np.ndarray) -> int:
+    n_zero = 0
+    for value in x:
+
+        if np.isclose(value, 0.0, atol=1e-5):
+            n_zero += 1
+
+    return n_zero

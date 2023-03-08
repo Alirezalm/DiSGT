@@ -3,7 +3,7 @@ from graph import RingGraph
 from problems import SparseConvexQP
 from utils import create_random_qp
 
-N = 4
+N = 10
 network = RingGraph(N)
 n = 10
 problems = []
@@ -15,5 +15,5 @@ for i in range(N):
 
 
 dg = DiSGT(problems, network)
-dg.optimize()
+print(dg.optimize())
 
