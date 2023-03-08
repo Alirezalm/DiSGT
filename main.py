@@ -15,7 +15,8 @@ for i in range(N):
 
     problems.append(SparseLogisticRegression(X, y, kappa))
 
-dg = DiSGT(problems, network)
+dg = DiSGT()
+dg.set_local_problems(problems)
+dg.set_network_topology(network)
+
 x, f = dg.optimize()
-
-
