@@ -128,3 +128,22 @@ class TaskStartIteration(TaskBase):
 
     def execute(self):
         self.env.results.make_iteration()
+
+
+class TaskCheckTermination(TaskBase):
+    def __init__(self, env: "Environment"):
+        super().__init__(env)
+        self.env = env
+
+    def initialize(self):
+        pass
+
+    def execute(self):
+        err = self.env.results.compute_error()
+
+        if err <= self.env.settings.eps:
+            for task, task_id in self.env.task_manager.tasks:
+                task.deactivate()
+            self.env.task_manager.clear_tasks()
+
+

@@ -8,7 +8,8 @@ from problems import ISparseProblem
 import gurobipy as gp
 from gurobipy import GRB
 
-from tasks import TaskStartIteration, TaskManager, TaskAddPrimalSolution, TaskEnforceSparsity, TaskUpdateDualVariables
+from tasks import TaskStartIteration, TaskManager, TaskAddPrimalSolution, TaskEnforceSparsity, TaskUpdateDualVariables, \
+    TaskCheckTermination
 from utils import get_sparsity
 
 
@@ -72,7 +73,7 @@ class Result:
         self.current_dual_solutions.append(lmbd)
 
     def compute_error(self):
-        return float(np.linalg.norm(self.current_solution - self.current_solution, 2))
+        return float(np.linalg.norm(self.current_solution - self.current_aug_solution, 2))
 
     def get_current_iteration(self):
         return self.env.iteration
@@ -216,6 +217,9 @@ class DiSGT:
         task_add_dual_sol = TaskUpdateDualVariables(self.env)
         self.env.task_manager.add_task(task_add_dual_sol, "t_add_dual")
 
+        task_check_termination = TaskCheckTermination(self.env)
+        self.env.task_manager.add_task(task_check_termination, "t_check_termination")
+
     def optimize(self):
 
         while not self.env.task_manager.is_task_queue_empty():
@@ -224,32 +228,4 @@ class DiSGT:
                     task.initialize()
                     task.execute()
 
-# def display_info(self, x, err):
-#     log = f"{get_sparsity(x)} of {x.shape[0] - self.kappa}| {err: 4.4f}"
-#
-#     print(log)
-
-# def optimize(self):
-#     err = 1e10
-#     n = self.p[0].get_dim()
-#
-#     lmbd = np.zeros([n, 1])
-#     y = np.zeros([n, 1])
-#     rho = self.s.rho
-#
-#     while err > self.s.eps:
-#         x = self.primal_solver.update_x(lmbd, y, rho)
-#         y = self.sparsity_enforcer.enforce(x, lmbd, rho, self.s.M, self.kappa)
-#
-#         lmbd += rho * (x - y)
-#         err = np.linalg.norm(x - y)
-#         # print(np.linalg.norm(x - y))
-#         self.display_info(x, err)
-#         f = self.compute_total_objective(x)
-#
-#     return x, f
-#
-# def compute_total_objective(self, x: np.ndarray):
-#     return sum([
-#         problem.compute_obj_at(x) for problem in self.p
-#     ])
+        return self.env.results
