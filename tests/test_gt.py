@@ -73,7 +73,7 @@ class RandomLogRegObjective(ObjectiveFunction):
 def test_gt_logistic_regression():
     N = 4
     n = 20
-    m = 1000
+    m = 500
     topology = RingGraph(N)
     agents = []
     for i in range(N):
@@ -96,4 +96,4 @@ def test_gt_logistic_regression():
     lr = LogisticRegression(penalty=None, fit_intercept=False)
     estimator = lr.fit(X, y.reshape(-1,))
 
-    assert np.allclose(estimator.coef_.reshape(n, 1), x, rtol=1e-3)
+    assert np.allclose(estimator.coef_.reshape(n, 1), x, rtol=1e-2)

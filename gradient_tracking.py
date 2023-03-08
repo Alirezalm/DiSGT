@@ -22,6 +22,7 @@ class GtConfig:
     max_iter: int = 1e4
     gamma: float = 1e-2
     eps: float = 1e-10
+    verbose: bool = False
 
 
 class Agent:
@@ -92,19 +93,26 @@ class GradientTracking:
         err = 1e10
         self.initialize()
         f = self.compute_total_obj()
-        while err > self.cfg.eps:
-
+        x = x0
+        count = 0
+        while (err > self.cfg.eps) and (count <= self.cfg.max_iter):
+            count += 1
             for agent_index, agent in enumerate(self.network.agents):
                 neighbours = self.network.get_neighbours_index_by_node_index(agent_index)
+
                 x = self.estimate_x(agent_index, neighbours)
                 y = self.estimate_y(agent_index, neighbours, x)
+
                 self.tmp_storage.add_new_estimates(x, y)
 
             self.update_agents()
             fold = f
             f = self.compute_total_obj()
-            err = abs(f - fold)
-            print(y.T)
+            err = self.compute_total_error()
+
+            if self.cfg:
+                self.display_logs()
+
         return f, x
 
     def update_agents(self):
@@ -139,3 +147,15 @@ class GradientTracking:
 
     def compute_total_obj(self) -> float:
         return sum([agent.obj.get_obj_at(agent.current_x_estimate) for agent in self.network.agents])
+
+    def compute_total_error(self):
+        err = sum([
+            np.linalg.norm(agent.current_y_estimate) for agent in self.network.agents
+        ])
+        return err
+
+    def display_logs(self):
+        log = ""
+        for agent in self.network.agents:
+            log += f"{agent.obj.get_obj_at(agent.current_x_estimate):5.3f}  {np.linalg.norm(agent.current_x_estimate):5.3f} |"
+        print(log)
