@@ -21,7 +21,7 @@ class ObjectiveFunction(ABC):
 class GtConfig:
     max_iter: int = 1e4
     gamma: float = 1e-2
-    eps: float = 1e-6
+    eps: float = 1e-7
 
 
 class Agent:
@@ -65,7 +65,7 @@ class TemporaryStorage:
         assert len(self.x_temp) == self.network.get_size()
         for ind, agent in enumerate(self.network.agents):
             agent.current_x_estimate = self.x_temp[ind]
-            agent.current_y_estimate = self.x_temp[ind]
+            agent.current_y_estimate = self.y_temp[ind]
         self.reset()
 
     def reset(self):
@@ -104,6 +104,8 @@ class GradientTracking:
             fold = f
             f = self.compute_total_obj()
             err = abs(f - fold)
+            print(y.T)
+        return f, x
 
     def update_agents(self):
         self.tmp_storage.update_nodes()
@@ -127,6 +129,7 @@ class GradientTracking:
             aggr += self.weights[node_index, k] * self.network.agents[k].current_y_estimate
 
         aggr += self.weights[node_index, node_index] * self.network.agents[node_index].current_y_estimate
+
         x_old = self.network.agents[node_index].current_x_estimate
 
         grad = self.network.agents[node_index].obj.get_grad_at(new_estimate_x)

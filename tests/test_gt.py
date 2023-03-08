@@ -17,12 +17,13 @@ class QuadraticObj(ObjectiveFunction):
         return self.P @ x + self.c
 
 
-def test_gradient_tracking():
+def test_gradient_tracking_qp():
     N = 4
-    n = 10
+    n = 3
     topology = RingGraph(N)
     agents = []
     for i in range(N):
+
         obj = QuadraticObj(dim=n)
 
         agents.append(Agent(obj))
@@ -31,5 +32,22 @@ def test_gradient_tracking():
 
     gt = GradientTracking(network)
     x0 = np.zeros([n, 1])
-    gt.run(x0)
+    f_dist, x = gt.run(x0)
+
+    # centralized solution
+    P = np.zeros([n, n])
+    c = np.zeros([n, 1])
+    d = 0
+    for agent in agents:
+        P += agent.obj.P
+        c += agent.obj.c
+        d += agent.obj.d
+
+    x_opt = np.linalg.solve(P, -c).reshape(n, 1)
+    f_cent = float(0.5 * x_opt.T @ P @ x_opt + c.T @ x_opt + d)
+
+    assert np.isclose(f_cent, f_dist)
+
+
+
 
