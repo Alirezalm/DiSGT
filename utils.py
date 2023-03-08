@@ -11,7 +11,6 @@ def is_pd(Q: np.ndarray):
 
 
 def create_random_qp(n: int = 2) -> Tuple[np.ndarray, np.ndarray, float]:
-
     Q = preprocessing.normalize(randn(n, n), norm="l2")
     q = randn(n, 1)
     d = randn()
@@ -22,3 +21,12 @@ def create_random_qp(n: int = 2) -> Tuple[np.ndarray, np.ndarray, float]:
     Q = V @ np.diagflat(1 + rand(n, 1)) @ V.T
 
     return Q, q, d
+
+
+def create_random_logistic_regression_data(m: int = 100, n: int = 2) -> Tuple[np.ndarray, np.ndarray]:
+    X = preprocessing.normalize(randn(m, n), norm="l2")
+    y = randn(m, 1)
+    y[y >= 0.5] = 1
+    y[y < 0.5] = 0
+
+    return X, y

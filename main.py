@@ -4,7 +4,7 @@
 # import numpy as np
 #
 #
-# class QuadraticObj(ObjectiveFunction):
+# class RandomQuadraticObj(ObjectiveFunction):
 #
 #     def __init__(self, dim: int):
 #         self.P, self.c, self.d = create_random_qp(dim)
@@ -22,7 +22,7 @@
 #     topology = RingGraph(N)
 #     agents = []
 #     for i in range(N):
-#         obj = QuadraticObj(dim=n)
+#         obj = RandomQuadraticObj(dim=n)
 #         agents.append(Agent(obj))
 #
 #     network = ComputationNetwork(topology, agents)

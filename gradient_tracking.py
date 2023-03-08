@@ -21,7 +21,7 @@ class ObjectiveFunction(ABC):
 class GtConfig:
     max_iter: int = 1e4
     gamma: float = 1e-2
-    eps: float = 1e-7
+    eps: float = 1e-10
 
 
 class Agent:
