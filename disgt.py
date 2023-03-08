@@ -9,7 +9,7 @@ import gurobipy as gp
 from gurobipy import GRB
 
 from tasks import TaskStartIteration, TaskManager, TaskAddPrimalSolution, TaskEnforceSparsity, TaskUpdateDualVariables, \
-    TaskCheckTermination
+    TaskCheckTermination, TaskPrintIterInfo
 from utils import get_sparsity
 
 
@@ -212,13 +212,16 @@ class DiSGT:
         self.env.task_manager.add_task(task_solve_primal, "t_solve_primal")
 
         task_enforce_sparsity = TaskEnforceSparsity(self.env)
-        self.env.task_manager.add_task(task_enforce_sparsity, "t_enforce_primal")
+        self.env.task_manager.add_task(task_enforce_sparsity, "t_enforce_sparsity")
 
         task_add_dual_sol = TaskUpdateDualVariables(self.env)
         self.env.task_manager.add_task(task_add_dual_sol, "t_add_dual")
 
         task_check_termination = TaskCheckTermination(self.env)
         self.env.task_manager.add_task(task_check_termination, "t_check_termination")
+
+        task_print_iter = TaskPrintIterInfo(self.env)
+        self.env.task_manager.add_task(task_print_iter, "t_print_iter")
 
     def optimize(self):
 

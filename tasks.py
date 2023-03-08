@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 from typing import List, Tuple
 
@@ -69,6 +70,12 @@ class TaskAddPrimalSolution(TaskBase):
         )
 
         self.env.results.add_solution(x)
+
+        f = sum(
+            [p.compute_obj_at(x) for p in self.env.problems]
+        )
+
+        self.env.results.set_total_obj_val(f)
 
 
 class TaskEnforceSparsity(TaskBase):
@@ -147,3 +154,20 @@ class TaskCheckTermination(TaskBase):
             self.env.task_manager.clear_tasks()
 
 
+class TaskPrintIterInfo(TaskBase):
+    def __init__(self, env: "Environment"):
+        super().__init__(env)
+        self.env = env
+
+    def initialize(self):
+        pass
+
+    def execute(self):
+        x = self.env.results.current_solution
+        log = ""
+        for problem in self.env.problems:
+            log += f"{problem.compute_obj_at(x):5.4f} | "
+        log += f"{self.env.results.total_obj_val:5.4f} | "
+        log += f"{self.env.results.compute_error():5.4f} | "
+
+        print(log)
