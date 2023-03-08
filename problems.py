@@ -58,14 +58,33 @@ class SparseConvexQP(ISparseProblem):
 
 
 class SparseLogisticRegression(ISparseProblem):
-    def get_dim(self):
-        pass
+
+    def __init__(self, X: np.ndarray, y: np.ndarray, kappa: int):
+        self.X = X
+        self.y = y
+        self.kappa = kappa
 
     def compute_obj_at(self, x: np.ndarray) -> float:
-        pass
+        n = x.shape[0]
+        h = self.logistic(x)
+        return float(-self.y.T @ np.log(h) - (1 - self.y).T @ np.log(1 - h))
+
+    def logistic(self, x: np.ndarray) -> np.ndarray:
+        z = self.X @ x
+        h = 1 / (1 + np.exp(-z))
+        h[h == 1] = 1 - 1e-8
+        h[h == 0] = 1e-8
+        return h
 
     def compute_grad_at(self, x: np.ndarray) -> np.ndarray:
-        pass
+        h = self.logistic(x)
+        return self.X.T @ (h - self.y)
+
+    def get_dim(self):
+        return self.X.shape[1]
+
+    def get_kappa(self):
+        return self.kappa
 
 
 class SparseLinearRegression(ISparseProblem):

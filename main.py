@@ -1,19 +1,21 @@
 from disgt import DiSGT
 from graph import RingGraph
-from problems import SparseConvexQP
-from utils import create_random_qp
+from problems import SparseLogisticRegression
+from utils import create_random_logistic_regression_data
 
 N = 10
 network = RingGraph(N)
 n = 10
+m = 100
 problems = []
 kappa = 5
 
 for i in range(N):
-    Q, q, d = create_random_qp(n)
-    problems.append(SparseConvexQP(Q, q, d, kappa))
+    X, y = create_random_logistic_regression_data(m, n)
 
+    problems.append(SparseLogisticRegression(X, y, kappa))
 
 dg = DiSGT(problems, network)
-print(dg.optimize())
+x, f = dg.optimize()
+
 

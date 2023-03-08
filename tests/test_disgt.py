@@ -1,7 +1,9 @@
 import numpy as np
 
-from disgt import SparsityEnforcer
-from utils import get_sparsity
+from disgt import SparsityEnforcer, DiSGT
+from graph import RingGraph
+from problems import SparseConvexQP, SparseLogisticRegression
+from utils import get_sparsity, create_random_qp, create_random_logistic_regression_data
 
 
 def test_sparsity_enforcer():
@@ -26,3 +28,38 @@ def test_check_nonzero():
     x[7] = 0.00001
 
     assert get_sparsity(x) >= desired
+
+
+def test_disgt_for_qp():
+    N = 10
+    network = RingGraph(N)
+    n = 10
+    problems = []
+    kappa = 5
+
+    for i in range(N):
+        Q, q, d = create_random_qp(n)
+        problems.append(SparseConvexQP(Q, q, d, kappa))
+
+    dg = DiSGT(problems, network)
+    x, f = dg.optimize()
+
+    assert get_sparsity(x) >= n - kappa
+
+
+def test_disgt_for_logreg():
+    N = 10
+    network = RingGraph(N)
+    n = 10
+    m = 100
+    problems = []
+    kappa = 5
+
+    for i in range(N):
+        X, y = create_random_logistic_regression_data(m, n)
+
+        problems.append(SparseLogisticRegression(X, y, kappa))
+
+    dg = DiSGT(problems, network)
+    x, f = dg.optimize()
+    assert get_sparsity(x) >= n - kappa
